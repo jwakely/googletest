@@ -446,9 +446,14 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 #elif GTEST_OS_WINDOWS
 
-// <regex.h> is not available on Windows.  Use our own simple regex
-// implementation instead.
-# define GTEST_USES_SIMPLE_RE 1
+// <regex.h> is not available on Windows.  Use std::regex or
+// our own simple regex implementation instead.
+# if defined(_MSC_VER)
+#  define GTEST_USES_STD_REGEX 1
+#  include <regex>
+# else
+#  define GTEST_USES_SIMPLE_RE 1
+# endif
 
 #else
 
@@ -1252,6 +1257,10 @@ class GTEST_API_ RE {
 
   regex_t full_regex_;     // For FullMatch().
   regex_t partial_regex_;  // For PartialMatch().
+
+#elif GTEST_USES_STD_REGEX
+
+  std::regex regex_;     // For both FullMatch() and PartialMatch().
 
 #else  // GTEST_USES_SIMPLE_RE
 

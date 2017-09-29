@@ -620,6 +620,39 @@ void RE::Init(const char* regex) {
   delete[] full_pattern;
 }
 
+#elif GTEST_USES_STD_REGEX
+
+// Implements the RE class.
+
+RE::~RE() {
+}
+
+// Returns true iff regular expression re matches the entire str.
+bool RE::FullMatch(const char* str, const RE& re) {
+  return re.is_valid_ && std::regex_match(str, re.regex_);
+}
+
+// Returns true iff regular expression re matches a substring of str
+// (including str itself).
+bool RE::PartialMatch(const char* str, const RE& re) {
+  return re.is_valid_ && std::regex_search(str, re.regex_);
+}
+
+// Initializes an RE from its string representation.
+void RE::Init(const char* regex) {
+  pattern_ = NULL;
+  if (regex != NULL) {
+    pattern_ = posix::StrDup(regex);
+  }
+
+  try {
+    regex_ = std::regex(regex);
+    is_valid_ = true;
+  } catch (...) {
+    is_valid_ = false;
+  }
+}
+
 #elif GTEST_USES_SIMPLE_RE
 
 // Returns true iff ch appears anywhere in str (excluding the
